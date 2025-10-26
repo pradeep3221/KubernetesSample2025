@@ -66,6 +66,10 @@ Log.Information("Starting API Gateway...");
 // Use CORS
 app.UseCors("AllowAll");
 
+// Serve static files (for Swagger landing page)
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
 // Prometheus metrics
 app.MapPrometheusScrapingEndpoint();
 

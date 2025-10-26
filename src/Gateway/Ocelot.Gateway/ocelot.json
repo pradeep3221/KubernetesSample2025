@@ -11,10 +11,6 @@
       ],
       "UpstreamPathTemplate": "/orders/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
-      "AuthenticationOptions": {
-        "AuthenticationProviderKey": "Keycloak",
-        "AllowedScopes": []
-      },
       "RateLimitOptions": {
         "ClientWhitelist": [],
         "EnableRateLimiting": true,
@@ -32,12 +28,8 @@
           "Port": 8080
         }
       ],
-      "UpstreamPathTemplate": "/inventory/{everything}",
+      "UpstreamPathTemplate": "/api/inventory/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
-      "AuthenticationOptions": {
-        "AuthenticationProviderKey": "Keycloak",
-        "AllowedScopes": []
-      },
       "RateLimitOptions": {
         "ClientWhitelist": [],
         "EnableRateLimiting": true,
@@ -55,7 +47,7 @@
           "Port": 8080
         }
       ],
-      "UpstreamPathTemplate": "/notifications/{everything}",
+      "UpstreamPathTemplate": "/api/notifications/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "Keycloak",
@@ -78,7 +70,7 @@
           "Port": 8080
         }
       ],
-      "UpstreamPathTemplate": "/audit/{everything}",
+      "UpstreamPathTemplate": "/api/audit/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post" ],
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "Keycloak",

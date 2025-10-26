@@ -7,7 +7,7 @@ import { KeycloakService } from 'keycloak-angular';
   providedIn: 'root'
 })
 export class AdminApiService {
-  private apiUrl = 'http://localhost:5000'; // API Gateway URL
+  private apiUrl = 'http://localhost:5000/api'; // API Gateway URL
 
   constructor(
     private http: HttpClient,
@@ -25,7 +25,7 @@ export class AdminApiService {
   // Orders
   async getAllOrders(): Promise<Observable<any[]>> {
     const headers = await this.getHeaders();
-    return this.http.get<any[]>(`${this.apiUrl}/orders`, { headers });
+    return this.http.get<any[]>(`${this.apiUrl}api/inventory/orders`, { headers });
   }
 
   async getOrder(id: string): Promise<Observable<any>> {

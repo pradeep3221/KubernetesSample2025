@@ -18,5 +18,6 @@ RUN dotnet publish "Ocelot.Gateway.csproj" -c Release -o /app/publish /p:UseAppH
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+COPY src/Gateway/Ocelot.Gateway/ocelot.json .
 ENTRYPOINT ["dotnet", "Ocelot.Gateway.dll"]
 

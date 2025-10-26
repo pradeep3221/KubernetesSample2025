@@ -1,6 +1,6 @@
 import { APP_INITIALIZER, NgModule, isDevMode } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { KeycloakAngularModule, KeycloakService } from 'keycloak-angular';
 import { ServiceWorkerModule } from '@angular/service-worker';
@@ -13,6 +13,7 @@ import { InventoryManagementComponent } from './components/inventory-management/
 import { AuditLogsComponent } from './components/audit-logs/audit-logs.component';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { SidebarComponent } from './components/sidebar/sidebar.component';
+import { AuthInterceptor } from './interceptors/auth.interceptor';
 
 function initializeKeycloak(keycloak: KeycloakService) {
   return () =>
@@ -20,7 +21,7 @@ function initializeKeycloak(keycloak: KeycloakService) {
       config: {
         url: 'http://localhost:8080',
         realm: 'microservices',
-        clientId: 'admin-console'
+        clientId: 'admin-pwa'
       },
       initOptions: {
         onLoad: 'login-required',
@@ -58,6 +59,11 @@ function initializeKeycloak(keycloak: KeycloakService) {
       useFactory: initializeKeycloak,
       multi: true,
       deps: [KeycloakService]
+    },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptor,
+      multi: true
     }
   ],
   bootstrap: [AppComponent]

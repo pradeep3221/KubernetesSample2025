@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
+using Ocelot.Provider.Polly;
 using OpenTelemetry.Metrics;
 using Shared.Observability;
 using Serilog;
@@ -15,6 +16,9 @@ builder.Host.UseSerilog();
 
 // Add configuration for Ocelot
 builder.Configuration.AddJsonFile("ocelot.json", optional: false, reloadOnChange: true);
+
+// Log the configuration
+Log.Information("Ocelot configuration loaded from ocelot.json");
 
 // Add Authentication
 var keycloakAuthority = builder.Configuration["Keycloak:Authority"] ?? "http://localhost:8080/realms/microservices";
@@ -32,8 +36,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-// Add Ocelot
-builder.Services.AddOcelot();
+// Add Ocelot with rate limiting
+builder.Services.AddOcelot()
+    .AddPolly();
 
 // Add Health Checks
 builder.Services.AddHealthChecks();
@@ -66,7 +71,26 @@ Log.Information("Starting API Gateway...");
 // Use CORS
 app.UseCors("AllowAll");
 
-// Serve static files (for Swagger landing page)
+// Add Authentication and Authorization middleware
+app.UseAuthentication();
+app.UseAuthorization();
+
+Log.Information("API Gateway configured, starting Ocelot...");
+
+// Log the routes from configuration
+var routes = builder.Configuration.GetSection("Routes").GetChildren();
+Log.Information($"Found {routes.Count()} routes in configuration");
+foreach (var route in routes)
+{
+    var upstream = route["UpstreamPathTemplate"];
+    var downstream = route["DownstreamPathTemplate"];
+    Log.Information($"Route: {upstream} -> {downstream}");
+}
+
+// Use Ocelot (must be before static files)
+await app.UseOcelot();
+
+// Serve static files (for Swagger landing page) - after Ocelot
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
@@ -75,11 +99,6 @@ app.MapPrometheusScrapingEndpoint();
 
 // Health checks
 app.MapHealthChecks("/health");
-
-Log.Information("API Gateway configured, starting Ocelot...");
-
-// Use Ocelot
-await app.UseOcelot();
 
 Log.Information("API Gateway started successfully");
 

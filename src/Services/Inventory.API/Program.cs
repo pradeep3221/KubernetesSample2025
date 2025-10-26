@@ -87,13 +87,16 @@ app.UseSerilogRequestLogging(options =>
 
 Log.Information("Starting Inventory API...");
 
-// Auto-migrate database
+// Auto-migrate database and seed data
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<InventoryDbContext>();
     Log.Information("Running database migrations...");
     db.Database.Migrate();
     Log.Information("Database migrations completed");
+
+    // Seed initial data
+    await SeedInventoryData(db);
 }
 
 if (app.Environment.IsDevelopment())
@@ -208,6 +211,139 @@ app.MapDelete("/api/inventory/products/{id:guid}", async (Guid id, IProductRepos
 app.MapControllers();
 
 Log.Information("Inventory API started successfully");
+
+// Seed data function
+async Task SeedInventoryData(InventoryDbContext db)
+{
+    try
+    {
+        // Check if data already exists
+        if (await db.Products.AnyAsync())
+        {
+            Log.Information("Inventory data already exists, skipping seed");
+            return;
+        }
+
+        Log.Information("Seeding inventory data...");
+
+        var products = new List<Product>
+        {
+            new Product
+            {
+                Id = Guid.Parse("10000000-0000-0000-0000-000000000001"),
+                Sku = "LAPTOP-001",
+                Name = "Dell XPS 13",
+                Description = "High-performance ultrabook with Intel Core i7, 16GB RAM, 512GB SSD",
+                Quantity = 50,
+                ReservedQuantity = 0,
+                LowStockThreshold = 10,
+                Price = 1299.99m,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            },
+            new Product
+            {
+                Id = Guid.Parse("10000000-0000-0000-0000-000000000002"),
+                Sku = "MOUSE-001",
+                Name = "Logitech MX Master 3S",
+                Description = "Advanced wireless mouse with precision scrolling and customizable buttons",
+                Quantity = 150,
+                ReservedQuantity = 0,
+                LowStockThreshold = 20,
+                Price = 99.99m,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            },
+            new Product
+            {
+                Id = Guid.Parse("10000000-0000-0000-0000-000000000003"),
+                Sku = "KEYBOARD-001",
+                Name = "Mechanical Keyboard RGB",
+                Description = "Mechanical keyboard with RGB backlighting, Cherry MX switches",
+                Quantity = 75,
+                ReservedQuantity = 0,
+                LowStockThreshold = 15,
+                Price = 149.99m,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            },
+            new Product
+            {
+                Id = Guid.Parse("10000000-0000-0000-0000-000000000004"),
+                Sku = "MONITOR-001",
+                Name = "LG UltraWide 34\"",
+                Description = "34-inch ultrawide monitor with 3440x1440 resolution, 144Hz refresh rate",
+                Quantity = 25,
+                ReservedQuantity = 0,
+                LowStockThreshold = 5,
+                Price = 799.99m,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            },
+            new Product
+            {
+                Id = Guid.Parse("10000000-0000-0000-0000-000000000005"),
+                Sku = "HEADPHONES-001",
+                Name = "Sony WH-1000XM5",
+                Description = "Premium noise-cancelling wireless headphones with 30-hour battery",
+                Quantity = 40,
+                ReservedQuantity = 0,
+                LowStockThreshold = 8,
+                Price = 399.99m,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            },
+            new Product
+            {
+                Id = Guid.Parse("10000000-0000-0000-0000-000000000006"),
+                Sku = "WEBCAM-001",
+                Name = "Logitech C920 Pro",
+                Description = "1080p HD webcam with auto-focus and stereo microphone",
+                Quantity = 60,
+                ReservedQuantity = 0,
+                LowStockThreshold = 12,
+                Price = 79.99m,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            },
+            new Product
+            {
+                Id = Guid.Parse("10000000-0000-0000-0000-000000000007"),
+                Sku = "DOCK-001",
+                Name = "USB-C Docking Station",
+                Description = "Universal USB-C dock with HDMI, USB 3.0, and power delivery",
+                Quantity = 35,
+                ReservedQuantity = 0,
+                LowStockThreshold = 7,
+                Price = 129.99m,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            },
+            new Product
+            {
+                Id = Guid.Parse("10000000-0000-0000-0000-000000000008"),
+                Sku = "CABLE-001",
+                Name = "HDMI 2.1 Cable 6ft",
+                Description = "High-speed HDMI 2.1 cable supporting 8K resolution",
+                Quantity = 200,
+                ReservedQuantity = 0,
+                LowStockThreshold = 30,
+                Price = 19.99m,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            }
+        };
+
+        await db.Products.AddRangeAsync(products);
+        await db.SaveChangesAsync();
+
+        Log.Information("Successfully seeded {ProductCount} products", products.Count);
+    }
+    catch (Exception ex)
+    {
+        Log.Error(ex, "Error seeding inventory data");
+    }
+}
 
 try
 {

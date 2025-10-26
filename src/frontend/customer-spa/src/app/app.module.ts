@@ -1,6 +1,6 @@
 import { APP_INITIALIZER, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { KeycloakAngularModule, KeycloakService } from 'keycloak-angular';
 
@@ -12,6 +12,7 @@ import { OrderDetailComponent } from './components/order-detail/order-detail.com
 import { CreateOrderComponent } from './components/create-order/create-order.component';
 import { ProductsComponent } from './components/products/products.component';
 import { NavbarComponent } from './components/navbar/navbar.component';
+import { AuthInterceptor } from './interceptors/auth.interceptor';
 
 function initializeKeycloak(keycloak: KeycloakService) {
   return () =>
@@ -54,6 +55,11 @@ function initializeKeycloak(keycloak: KeycloakService) {
       useFactory: initializeKeycloak,
       multi: true,
       deps: [KeycloakService]
+    },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptor,
+      multi: true
     }
   ],
   bootstrap: [AppComponent]

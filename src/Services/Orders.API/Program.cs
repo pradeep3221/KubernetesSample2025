@@ -89,13 +89,16 @@ app.UseSerilogRequestLogging(options =>
 
 Log.Information("Starting Orders API...");
 
-// Auto-migrate database
+// Auto-migrate database and seed data
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<OrdersDbContext>();
     Log.Information("Running database migrations...");
     db.Database.Migrate();
     Log.Information("Database migrations completed");
+
+    // Seed initial data
+    await SeedOrdersData(db);
 }
 
 if (app.Environment.IsDevelopment())
@@ -173,6 +176,145 @@ app.MapPost("/api/orders/{id:guid}/ship", async (Guid id, string trackingNumber,
 app.MapControllers();
 
 Log.Information("Orders API started successfully on {Urls}", app.Urls);
+
+// Seed data function
+async Task SeedOrdersData(OrdersDbContext db)
+{
+    try
+    {
+        // Check if data already exists
+        if (await db.Orders.AnyAsync())
+        {
+            Log.Information("Orders data already exists, skipping seed");
+            return;
+        }
+
+        Log.Information("Seeding orders data...");
+
+        var customerId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+
+        var orders = new List<Order>
+        {
+            new Order
+            {
+                Id = Guid.Parse("20000000-0000-0000-0000-000000000001"),
+                OrderNumber = "ORD-2025-001",
+                CustomerId = customerId,
+                CreatedAt = DateTime.UtcNow.AddDays(-5),
+                ConfirmedAt = DateTime.UtcNow.AddDays(-5),
+                Status = OrderStatus.Confirmed,
+                TotalAmount = 1399.98m,
+                Items = new List<Orders.API.Models.OrderItem>
+                {
+                    new Orders.API.Models.OrderItem
+                    {
+                        Id = Guid.NewGuid(),
+                        ProductId = Guid.Parse("10000000-0000-0000-0000-000000000001"),
+                        ProductName = "Dell XPS 13",
+                        Quantity = 1,
+                        UnitPrice = 1299.99m
+                    },
+                    new Orders.API.Models.OrderItem
+                    {
+                        Id = Guid.NewGuid(),
+                        ProductId = Guid.Parse("10000000-0000-0000-0000-000000000002"),
+                        ProductName = "Logitech MX Master 3S",
+                        Quantity = 1,
+                        UnitPrice = 99.99m
+                    }
+                }
+            },
+            new Order
+            {
+                Id = Guid.Parse("20000000-0000-0000-0000-000000000002"),
+                OrderNumber = "ORD-2025-002",
+                CustomerId = customerId,
+                CreatedAt = DateTime.UtcNow.AddDays(-3),
+                ConfirmedAt = DateTime.UtcNow.AddDays(-3),
+                ShippedAt = DateTime.UtcNow.AddDays(-1),
+                Status = OrderStatus.Shipped,
+                TotalAmount = 949.98m,
+                TrackingNumber = "TRACK-2025-001",
+                Items = new List<Orders.API.Models.OrderItem>
+                {
+                    new Orders.API.Models.OrderItem
+                    {
+                        Id = Guid.NewGuid(),
+                        ProductId = Guid.Parse("10000000-0000-0000-0000-000000000003"),
+                        ProductName = "Mechanical Keyboard RGB",
+                        Quantity = 1,
+                        UnitPrice = 149.99m
+                    },
+                    new Orders.API.Models.OrderItem
+                    {
+                        Id = Guid.NewGuid(),
+                        ProductId = Guid.Parse("10000000-0000-0000-0000-000000000005"),
+                        ProductName = "Sony WH-1000XM5",
+                        Quantity = 1,
+                        UnitPrice = 399.99m
+                    },
+                    new Orders.API.Models.OrderItem
+                    {
+                        Id = Guid.NewGuid(),
+                        ProductId = Guid.Parse("10000000-0000-0000-0000-000000000006"),
+                        ProductName = "Logitech C920 Pro",
+                        Quantity = 1,
+                        UnitPrice = 79.99m
+                    }
+                }
+            },
+            new Order
+            {
+                Id = Guid.Parse("20000000-0000-0000-0000-000000000003"),
+                OrderNumber = "ORD-2025-003",
+                CustomerId = customerId,
+                CreatedAt = DateTime.UtcNow.AddDays(-1),
+                Status = OrderStatus.Pending,
+                TotalAmount = 799.99m,
+                Items = new List<Orders.API.Models.OrderItem>
+                {
+                    new Orders.API.Models.OrderItem
+                    {
+                        Id = Guid.NewGuid(),
+                        ProductId = Guid.Parse("10000000-0000-0000-0000-000000000004"),
+                        ProductName = "LG UltraWide 34\"",
+                        Quantity = 1,
+                        UnitPrice = 799.99m
+                    }
+                }
+            },
+            new Order
+            {
+                Id = Guid.Parse("20000000-0000-0000-0000-000000000004"),
+                OrderNumber = "ORD-2025-004",
+                CustomerId = customerId,
+                CreatedAt = DateTime.UtcNow.AddHours(-12),
+                Status = OrderStatus.Pending,
+                TotalAmount = 129.99m,
+                Items = new List<Orders.API.Models.OrderItem>
+                {
+                    new Orders.API.Models.OrderItem
+                    {
+                        Id = Guid.NewGuid(),
+                        ProductId = Guid.Parse("10000000-0000-0000-0000-000000000007"),
+                        ProductName = "USB-C Docking Station",
+                        Quantity = 1,
+                        UnitPrice = 129.99m
+                    }
+                }
+            }
+        };
+
+        await db.Orders.AddRangeAsync(orders);
+        await db.SaveChangesAsync();
+
+        Log.Information("Successfully seeded {OrderCount} orders", orders.Count);
+    }
+    catch (Exception ex)
+    {
+        Log.Error(ex, "Error seeding orders data");
+    }
+}
 
 try
 {

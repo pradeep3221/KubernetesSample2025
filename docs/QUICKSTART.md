@@ -35,6 +35,9 @@ docker-compose up -d
 # ✅ 1 Identity Provider (Keycloak)
 # ✅ 4 Observability Tools (OpenTelemetry Collector, Prometheus, Loki, Tempo)
 # ✅ 1 Visualization Platform (Grafana)
+
+# Rebuild and restart all services
+docker-compose up -d --build
 ```
 
 ## Step 3: Wait for Services to be Ready

@@ -36,9 +36,16 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-// Add Ocelot with rate limiting
+// Add HttpContextAccessor for accessing the current HTTP context
+builder.Services.AddHttpContextAccessor();
+
+// Add custom delegating handler for token forwarding
+builder.Services.AddTransient<AuthTokenHandler>();
+
+// Add Ocelot with rate limiting and custom handler
 builder.Services.AddOcelot()
-    .AddPolly();
+    .AddPolly()
+    .AddDelegatingHandler<AuthTokenHandler>(true);
 
 // Add Health Checks
 builder.Services.AddHealthChecks();
@@ -113,5 +120,36 @@ catch (Exception ex)
 finally
 {
     Log.CloseAndFlush();
+}
+
+// Delegation handler to forward JWT token to downstream services
+public class AuthTokenHandler : DelegatingHandler
+{
+    private readonly IHttpContextAccessor _httpContextAccessor;
+
+    public AuthTokenHandler(IHttpContextAccessor httpContextAccessor)
+    {
+        _httpContextAccessor = httpContextAccessor;
+    }
+
+    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+    {
+        var httpContext = _httpContextAccessor.HttpContext;
+
+        if (httpContext != null)
+        {
+            // Get the Authorization header from the incoming request
+            var authHeader = httpContext.Request.Headers["Authorization"].ToString();
+
+            if (!string.IsNullOrEmpty(authHeader))
+            {
+                // Add it to the outgoing request to the downstream service
+                request.Headers.TryAddWithoutValidation("Authorization", authHeader);
+                Log.Information($"Forwarding Authorization header to downstream: {request.RequestUri}");
+            }
+        }
+
+        return await base.SendAsync(request, cancellationToken);
+    }
 }
 

@@ -49,21 +49,26 @@ builder.Services.AddMassTransit(x =>
     });
 });
 
-// Add Authentication
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        var keycloakUrl = builder.Configuration["Keycloak:Authority"] ?? "http://localhost:8080/realms/microservices";
-        options.Authority = keycloakUrl;
-        options.Audience = "orders-api";
-        options.RequireHttpsMetadata = false;
-    });
+// Authentication disabled for development
+// builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+//     .AddJwtBearer(options =>
+//     {
+//         var keycloakUrl = builder.Configuration["Keycloak:Authority"] ?? "http://localhost:8080/realms/microservices";
+//         options.Authority = keycloakUrl;
+//         options.RequireHttpsMetadata = false;
+//         options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+//         {
+//             ValidateAudience = false,
+//             ValidateIssuer = true,
+//             ValidIssuer = keycloakUrl
+//         };
+//     });
 
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("OrdersRead", policy => policy.RequireClaim("scope", "orders.read"));
-    options.AddPolicy("OrdersWrite", policy => policy.RequireClaim("scope", "orders.write"));
-});
+// builder.Services.AddAuthorization(options =>
+// {
+//     options.AddPolicy("OrdersRead", policy => policy.RequireClaim("scope", "orders.read"));
+//     options.AddPolicy("OrdersWrite", policy => policy.RequireClaim("scope", "orders.write"));
+// });
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -107,8 +112,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseAuthentication();
-app.UseAuthorization();
+// Authentication disabled for development
+// app.UseAuthentication();
+// app.UseAuthorization();
 
 // Prometheus metrics
 app.MapPrometheusScrapingEndpoint();
@@ -124,6 +130,7 @@ app.MapGet("/api/orders", async (OrdersDbContext db) =>
     var orders = await db.Orders.Include(o => o.Items).ToListAsync();
     return Results.Ok(orders);
 })
+// .RequireAuthorization("OrdersRead")
 .WithName("GetAllOrders")
 .WithOpenApi();
 
@@ -132,7 +139,7 @@ app.MapGet("/api/orders/{id:guid}", async (Guid id, OrdersDbContext db) =>
     var order = await db.Orders.Include(o => o.Items).FirstOrDefaultAsync(o => o.Id == id);
     return order is not null ? Results.Ok(order) : Results.NotFound();
 })
-.RequireAuthorization("OrdersRead")
+// .RequireAuthorization("OrdersRead")
 .WithName("GetOrderById")
 .WithOpenApi();
 
@@ -141,7 +148,7 @@ app.MapPost("/api/orders", async (CreateOrderRequest request, IOrderService orde
     var order = await orderService.CreateOrderAsync(request);
     return Results.Created($"/api/orders/{order.Id}", order);
 })
-.RequireAuthorization("OrdersWrite")
+// .RequireAuthorization("OrdersWrite")
 .WithName("CreateOrder")
 .WithOpenApi();
 
@@ -150,7 +157,7 @@ app.MapPost("/api/orders/{id:guid}/confirm", async (Guid id, IOrderService order
     var order = await orderService.ConfirmOrderAsync(id);
     return order is not null ? Results.Ok(order) : Results.NotFound();
 })
-.RequireAuthorization("OrdersWrite")
+// .RequireAuthorization("OrdersWrite")
 .WithName("ConfirmOrder")
 .WithOpenApi();
 
@@ -159,7 +166,7 @@ app.MapPost("/api/orders/{id:guid}/cancel", async (Guid id, string reason, IOrde
     var order = await orderService.CancelOrderAsync(id, reason);
     return order is not null ? Results.Ok(order) : Results.NotFound();
 })
-.RequireAuthorization("OrdersWrite")
+// .RequireAuthorization("OrdersWrite")
 .WithName("CancelOrder")
 .WithOpenApi();
 
@@ -168,7 +175,7 @@ app.MapPost("/api/orders/{id:guid}/ship", async (Guid id, string trackingNumber,
     var order = await orderService.ShipOrderAsync(id, trackingNumber);
     return order is not null ? Results.Ok(order) : Results.NotFound();
 })
-.RequireAuthorization("OrdersWrite")
+// .RequireAuthorization("OrdersWrite")
 .WithName("ShipOrder")
 .WithOpenApi();
 

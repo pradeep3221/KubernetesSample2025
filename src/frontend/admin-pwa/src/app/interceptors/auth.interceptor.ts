@@ -6,8 +6,8 @@ import {
   HttpInterceptor,
   HttpErrorResponse
 } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { Observable, throwError, from } from 'rxjs';
+import { catchError, switchMap } from 'rxjs/operators';
 import { KeycloakService } from 'keycloak-angular';
 
 @Injectable()
@@ -20,19 +20,23 @@ export class AuthInterceptor implements HttpInterceptor {
       return next.handle(request);
     }
 
-    // Add token to request
-    if (this.keycloak.isLoggedIn()) {
-      const token = this.keycloak.getToken();
-      if (token) {
-        request = request.clone({
-          setHeaders: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-      }
+    // If not logged in, just pass through
+    if (!this.keycloak.isLoggedIn()) {
+      return next.handle(request);
     }
 
-    return next.handle(request).pipe(
+    // Get token asynchronously and add to request
+    return from(this.keycloak.getToken()).pipe(
+      switchMap((token: string) => {
+        if (token) {
+          request = request.clone({
+            setHeaders: {
+              Authorization: `Bearer ${token}`
+            }
+          });
+        }
+        return next.handle(request);
+      }),
       catchError((error: HttpErrorResponse) => {
         if (error.status === 401) {
           // Token might be expired, try to refresh

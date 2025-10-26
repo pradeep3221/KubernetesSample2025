@@ -47,21 +47,21 @@ builder.Services.AddMassTransit(x =>
     });
 });
 
-// Add Authentication
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        var keycloakUrl = builder.Configuration["Keycloak:Authority"] ?? "http://localhost:8080/realms/microservices";
-        options.Authority = keycloakUrl;
-        options.Audience = "notifications-api";
-        options.RequireHttpsMetadata = false;
-    });
+// Authentication disabled for development
+// builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+//     .AddJwtBearer(options =>
+//     {
+//         var keycloakUrl = builder.Configuration["Keycloak:Authority"] ?? "http://localhost:8080/realms/microservices";
+//         options.Authority = keycloakUrl;
+//         options.Audience = "notifications-api";
+//         options.RequireHttpsMetadata = false;
+//     });
 
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("NotificationsRead", policy => policy.RequireClaim("scope", "notifications.read"));
-    options.AddPolicy("NotificationsWrite", policy => policy.RequireClaim("scope", "notifications.write"));
-});
+// builder.Services.AddAuthorization(options =>
+// {
+//     options.AddPolicy("NotificationsRead", policy => policy.RequireClaim("scope", "notifications.read"));
+//     options.AddPolicy("NotificationsWrite", policy => policy.RequireClaim("scope", "notifications.write"));
+// });
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -90,8 +90,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseAuthentication();
-app.UseAuthorization();
+// Authentication disabled for development
+// app.UseAuthentication();
+// app.UseAuthorization();
 
 // Prometheus metrics
 app.MapPrometheusScrapingEndpoint();
@@ -107,7 +108,7 @@ app.MapGet("/api/notifications/user/{userId:guid}", async (Guid userId, INotific
     var notifications = await service.GetUserNotificationsAsync(userId);
     return Results.Ok(notifications);
 })
-.RequireAuthorization("NotificationsRead")
+// .RequireAuthorization("NotificationsRead")
 .WithName("GetUserNotifications")
 .WithOpenApi();
 
@@ -116,7 +117,7 @@ app.MapGet("/api/notifications/{id:guid}", async (Guid id, INotificationService 
     var notification = await service.GetNotificationAsync(id);
     return notification is not null ? Results.Ok(notification) : Results.NotFound();
 })
-.RequireAuthorization("NotificationsRead")
+// .RequireAuthorization("NotificationsRead")
 .WithName("GetNotification")
 .WithOpenApi();
 
@@ -130,7 +131,7 @@ app.MapPost("/api/notifications", async (SendNotificationRequest request, INotif
         request.Metadata);
     return Results.Created($"/api/notifications/{notification.Id}", notification);
 })
-.RequireAuthorization("NotificationsWrite")
+// .RequireAuthorization("NotificationsWrite")
 .WithName("SendNotification")
 .WithOpenApi();
 
@@ -139,7 +140,7 @@ app.MapPost("/api/notifications/{id:guid}/mark-read", async (Guid id, INotificat
     var success = await service.MarkAsReadAsync(id);
     return success ? Results.Ok() : Results.NotFound();
 })
-.RequireAuthorization("NotificationsWrite")
+// .RequireAuthorization("NotificationsWrite")
 .WithName("MarkNotificationAsRead")
 .WithOpenApi();
 

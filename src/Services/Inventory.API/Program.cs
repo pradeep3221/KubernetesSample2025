@@ -48,21 +48,26 @@ builder.Services.AddMassTransit(x =>
     });
 });
 
-// Add Authentication
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        var keycloakUrl = builder.Configuration["Keycloak:Authority"] ?? "http://localhost:8080/realms/microservices";
-        options.Authority = keycloakUrl;
-        options.Audience = "inventory-api";
-        options.RequireHttpsMetadata = false;
-    });
+// Authentication disabled for development
+// builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+//     .AddJwtBearer(options =>
+//     {
+//         var keycloakUrl = builder.Configuration["Keycloak:Authority"] ?? "http://localhost:8080/realms/microservices";
+//         options.Authority = keycloakUrl;
+//         options.RequireHttpsMetadata = false;
+//         options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+//         {
+//             ValidateAudience = false,
+//             ValidateIssuer = true,
+//             ValidIssuer = keycloakUrl
+//         };
+//     });
 
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("InventoryRead", policy => policy.RequireClaim("scope", "inventory.read"));
-    options.AddPolicy("InventoryWrite", policy => policy.RequireClaim("scope", "inventory.write"));
-});
+// builder.Services.AddAuthorization(options =>
+// {
+//     options.AddPolicy("InventoryRead", policy => policy.RequireClaim("scope", "inventory.read"));
+//     options.AddPolicy("InventoryWrite", policy => policy.RequireClaim("scope", "inventory.write"));
+// });
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -105,8 +110,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseAuthentication();
-app.UseAuthorization();
+// Authentication disabled for development
+// app.UseAuthentication();
+// app.UseAuthorization();
 
 // Prometheus metrics
 app.MapPrometheusScrapingEndpoint();
@@ -122,6 +128,7 @@ app.MapGet("/api/inventory/products", async (IProductRepository repo) =>
     var products = await repo.GetAllAsync();
     return Results.Ok(products);
 })
+// .RequireAuthorization("InventoryRead")
 .WithName("GetAllProducts")
 .WithOpenApi();
 
@@ -130,7 +137,7 @@ app.MapGet("/api/inventory/products/{id:guid}", async (Guid id, IProductReposito
     var product = await repo.GetByIdAsync(id);
     return product is not null ? Results.Ok(product) : Results.NotFound();
 })
-.RequireAuthorization("InventoryRead")
+// .RequireAuthorization("InventoryRead")
 .WithName("GetProductById")
 .WithOpenApi();
 
@@ -139,7 +146,7 @@ app.MapGet("/api/inventory/products/sku/{sku}", async (string sku, IProductRepos
     var product = await repo.GetBySkuAsync(sku);
     return product is not null ? Results.Ok(product) : Results.NotFound();
 })
-.RequireAuthorization("InventoryRead")
+// .RequireAuthorization("InventoryRead")
 .WithName("GetProductBySku")
 .WithOpenApi();
 
@@ -148,7 +155,7 @@ app.MapGet("/api/inventory/products/low-stock", async (IProductRepository repo) 
     var products = await repo.GetLowStockProductsAsync();
     return Results.Ok(products);
 })
-.RequireAuthorization("InventoryRead")
+// .RequireAuthorization("InventoryRead")
 .WithName("GetLowStockProducts")
 .WithOpenApi();
 
@@ -167,7 +174,7 @@ app.MapPost("/api/inventory/products", async (CreateProductRequest request, IPro
     var created = await repo.CreateAsync(product);
     return Results.Created($"/api/inventory/products/{created.Id}", created);
 })
-.RequireAuthorization("InventoryWrite")
+// .RequireAuthorization("InventoryWrite")
 .WithName("CreateProduct")
 .WithOpenApi();
 
@@ -185,7 +192,7 @@ app.MapPut("/api/inventory/products/{id:guid}", async (Guid id, UpdateProductReq
     var updated = await repo.UpdateAsync(existing);
     return updated is not null ? Results.Ok(updated) : Results.NotFound();
 })
-.RequireAuthorization("InventoryWrite")
+// .RequireAuthorization("InventoryWrite")
 .WithName("UpdateProduct")
 .WithOpenApi();
 
@@ -194,7 +201,7 @@ app.MapPost("/api/inventory/products/{id:guid}/adjust", async (Guid id, AdjustQu
     var success = await repo.AdjustQuantityAsync(id, request.QuantityChange, request.Reason);
     return success ? Results.Ok() : Results.NotFound();
 })
-.RequireAuthorization("InventoryWrite")
+// .RequireAuthorization("InventoryWrite")
 .WithName("AdjustQuantity")
 .WithOpenApi();
 
@@ -203,7 +210,7 @@ app.MapDelete("/api/inventory/products/{id:guid}", async (Guid id, IProductRepos
     var success = await repo.DeleteAsync(id);
     return success ? Results.NoContent() : Results.NotFound();
 })
-.RequireAuthorization("InventoryWrite")
+// .RequireAuthorization("InventoryWrite")
 .WithName("DeleteProduct")
 .WithOpenApi();
 

@@ -11,6 +11,15 @@
       ],
       "UpstreamPathTemplate": "/orders/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Keycloak",
+        "AllowedScopes": []
+      },
+      "HttpHandlerOptions": {
+        "UseTracing": false,
+        "AllowAutoRedirect": true,
+        "UseCookieContainer": false
+      },
       "RateLimitOptions": {
         "ClientWhitelist": [],
         "EnableRateLimiting": true,
@@ -30,6 +39,13 @@
       ],
       "UpstreamPathTemplate": "/inventory/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Keycloak",
+        "AllowedScopes": []
+      },
+      "AddHeadersToRequest": {
+        "X-Forwarded-For": "127.0.0.1"
+      },
       "RateLimitOptions": {
         "ClientWhitelist": [],
         "EnableRateLimiting": true,

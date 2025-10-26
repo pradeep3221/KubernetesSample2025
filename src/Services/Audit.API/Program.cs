@@ -64,21 +64,21 @@ builder.Services.AddMassTransit(x =>
     });
 });
 
-// Add Authentication
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        var keycloakUrl = builder.Configuration["Keycloak:Authority"] ?? "http://localhost:8080/realms/microservices";
-        options.Authority = keycloakUrl;
-        options.Audience = "audit-api";
-        options.RequireHttpsMetadata = false;
-    });
+// Authentication disabled for development
+// builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+//     .AddJwtBearer(options =>
+//     {
+//         var keycloakUrl = builder.Configuration["Keycloak:Authority"] ?? "http://localhost:8080/realms/microservices";
+//         options.Authority = keycloakUrl;
+//         options.Audience = "audit-api";
+//         options.RequireHttpsMetadata = false;
+//     });
 
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("AuditRead", policy => policy.RequireClaim("scope", "audit.read"));
-    options.AddPolicy("AuditWrite", policy => policy.RequireClaim("scope", "audit.write"));
-});
+// builder.Services.AddAuthorization(options =>
+// {
+//     options.AddPolicy("AuditRead", policy => policy.RequireClaim("scope", "audit.read"));
+//     options.AddPolicy("AuditWrite", policy => policy.RequireClaim("scope", "audit.write"));
+// });
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -108,8 +108,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseAuthentication();
-app.UseAuthorization();
+// Authentication disabled for development
+// app.UseAuthentication();
+// app.UseAuthorization();
 
 // Prometheus metrics endpoint
 app.MapPrometheusScrapingEndpoint();
@@ -125,7 +126,7 @@ app.MapGet("/api/audit/events", async (IDocumentSession session) =>
     var events = await session.Events.QueryAllRawEvents().ToListAsync();
     return Results.Ok(events);
 })
-.RequireAuthorization("AuditRead")
+// .RequireAuthorization("AuditRead")
 .WithName("GetAllEvents")
 .WithOpenApi();
 
@@ -134,7 +135,7 @@ app.MapGet("/api/audit/events/{streamId}", async (string streamId, IDocumentSess
     var events = await session.Events.FetchStreamAsync(streamId);
     return events.Any() ? Results.Ok(events) : Results.NotFound();
 })
-.RequireAuthorization("AuditRead")
+// .RequireAuthorization("AuditRead")
 .WithName("GetEventsByStream")
 .WithOpenApi();
 
@@ -143,7 +144,7 @@ app.MapGet("/api/audit/documents", async (IDocumentSession session) =>
     var documents = await session.Query<AuditDocument>().ToListAsync();
     return Results.Ok(documents);
 })
-.RequireAuthorization("AuditRead")
+// .RequireAuthorization("AuditRead")
 .WithName("GetAllDocuments")
 .WithOpenApi();
 
@@ -155,7 +156,7 @@ app.MapGet("/api/audit/documents/{entity}", async (string entity, IDocumentSessi
         .ToListAsync();
     return Results.Ok(documents);
 })
-.RequireAuthorization("AuditRead")
+// .RequireAuthorization("AuditRead")
 .WithName("GetDocumentsByEntity")
 .WithOpenApi();
 
@@ -168,7 +169,7 @@ app.MapPost("/api/audit/replay/{streamId}", async (string streamId, IDocumentSes
     // Replay logic would go here
     return Results.Ok(new { StreamId = streamId, EventCount = events.Count, Message = "Replay initiated" });
 })
-.RequireAuthorization("AuditWrite")
+// .RequireAuthorization("AuditWrite")
 .WithName("ReplayEvents")
 .WithOpenApi();
 

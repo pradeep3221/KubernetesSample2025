@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { KeycloakService } from 'keycloak-angular';
 
 @Injectable({
   providedIn: 'root'
@@ -9,18 +8,7 @@ import { KeycloakService } from 'keycloak-angular';
 export class ApiService {
   private apiUrl = 'http://localhost:5000'; // API Gateway URL
 
-  constructor(
-    private http: HttpClient,
-    private keycloak: KeycloakService
-  ) {}
-
-  private async getHeaders(): Promise<HttpHeaders> {
-    const token = await this.keycloak.getToken();
-    return new HttpHeaders({
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    });
-  }
+  constructor(private http: HttpClient) {}
 
   // Products
   getProducts(): Observable<any[]> {
@@ -31,28 +19,46 @@ export class ApiService {
     return this.http.get<any>(`${this.apiUrl}/inventory/products/${id}`);
   }
 
+  createProduct(product: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/inventory/products`, product);
+  }
+
+  updateProduct(id: string, product: any): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/inventory/products/${id}`, product);
+  }
+
+  deleteProduct(id: string): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/inventory/products/${id}`);
+  }
+
   // Orders
-  async getOrders(): Promise<Observable<any[]>> {
-    const headers = await this.getHeaders();
-    return this.http.get<any[]>(`${this.apiUrl}/orders`, { headers });
+  getOrders(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/orders`);
   }
 
-  async getOrder(id: string): Promise<Observable<any>> {
-    const headers = await this.getHeaders();
-    return this.http.get<any>(`${this.apiUrl}/orders/${id}`, { headers });
+  getOrder(id: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/orders/${id}`);
   }
 
-  async createOrder(order: any): Promise<Observable<any>> {
-    const headers = await this.getHeaders();
-    return this.http.post<any>(`${this.apiUrl}/orders`, order, { headers });
+  createOrder(order: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/orders`, order);
   }
 
-  async cancelOrder(id: string, reason: string): Promise<Observable<any>> {
-    const headers = await this.getHeaders();
+  confirmOrder(id: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/orders/${id}/confirm`, {});
+  }
+
+  cancelOrder(id: string, reason: string): Observable<any> {
     return this.http.post<any>(
       `${this.apiUrl}/orders/${id}/cancel`,
-      { reason },
-      { headers }
+      { reason }
+    );
+  }
+
+  shipOrder(id: string, trackingNumber: string): Observable<any> {
+    return this.http.post<any>(
+      `${this.apiUrl}/orders/${id}/ship`,
+      { trackingNumber }
     );
   }
 }

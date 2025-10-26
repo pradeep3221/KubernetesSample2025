@@ -23,6 +23,8 @@ builder.Services.AddDbContext<OrdersDbContext>(options =>
     var connectionString = builder.Configuration.GetConnectionString("OrdersDb")
         ?? "Server=localhost;Database=orders_db;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;";
     options.UseSqlServer(connectionString);
+    options.ConfigureWarnings(warnings =>
+        warnings.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
 });
 
 // Add Services
@@ -184,16 +186,3 @@ finally
 {
     Log.CloseAndFlush();
 }
-
-public record CreateOrderRequest(
-    Guid CustomerId,
-    List<CreateOrderItemRequest> Items
-);
-
-public record CreateOrderItemRequest(
-    Guid ProductId,
-    string ProductName,
-    int Quantity,
-    decimal UnitPrice
-);
-

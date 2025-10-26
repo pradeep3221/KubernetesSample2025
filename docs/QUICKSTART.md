@@ -816,3 +816,17 @@ You now have a complete, production-ready microservices architecture running loc
 
 **Happy coding!** 💻✨
 
+
+
+
+# Via API Gateway (Recommended)
+curl http://localhost:5000/api/orders/health
+curl http://localhost:5000/api/inventory/health
+curl http://localhost:5000/api/notifications/health
+curl http://localhost:5000/api/audit/health
+
+# Direct API Access
+curl http://localhost:5001/health  # Orders
+curl http://localhost:5002/health  # Inventory
+curl http://localhost:5003/health  # Notifications
+curl http://localhost:5004/health  # Audit

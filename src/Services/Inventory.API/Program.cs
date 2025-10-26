@@ -22,6 +22,8 @@ builder.Services.AddDbContext<InventoryDbContext>(options =>
     var connectionString = builder.Configuration.GetConnectionString("InventoryDb")
         ?? "Host=localhost;Database=inventory_db;Username=postgres;Password=postgres";
     options.UseNpgsql(connectionString);
+    options.ConfigureWarnings(warnings =>
+        warnings.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
 });
 
 // Add Repositories

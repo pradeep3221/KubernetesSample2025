@@ -35,6 +35,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 // Add Ocelot
 builder.Services.AddOcelot();
 
+// Add Health Checks
+builder.Services.AddHealthChecks();
+
 // Add CORS
 builder.Services.AddCors(options =>
 {

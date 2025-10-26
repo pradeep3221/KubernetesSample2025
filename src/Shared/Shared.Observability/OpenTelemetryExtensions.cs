@@ -73,7 +73,6 @@ public static class OpenTelemetryExtensions
                     .AddAspNetCoreInstrumentation()
                     .AddHttpClientInstrumentation()
                     .AddRuntimeInstrumentation()
-                    .AddProcessInstrumentation()
                     .AddMeter("MassTransit")
                     .AddMeter(serviceName)
                     .AddPrometheusExporter()
@@ -96,7 +95,6 @@ public static class OpenTelemetryExtensions
             .Enrich.WithEnvironmentName()
             .Enrich.WithMachineName()
             .Enrich.WithThreadId()
-            .Enrich.WithSpan()
             .Enrich.WithProperty("Application", "KubernetesSamples")
             .WriteTo.Console(
                 outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz}] [{Level:u3}] [{ServiceName}] {Message:lj} {Properties:j}{NewLine}{Exception}")

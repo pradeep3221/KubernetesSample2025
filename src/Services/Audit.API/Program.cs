@@ -31,9 +31,12 @@ builder.Services.AddMarten(options =>
     options.Schema.For<AuditDocument>().Index(x => x.Entity);
     options.Schema.For<AuditDocument>().Index(x => x.Action);
     options.Schema.For<AuditDocument>().Index(x => x.Timestamp);
+
+    // Auto-create database objects
+    options.AutoCreateSchemaObjects = Weasel.Core.AutoCreate.All;
 })
 .UseLightweightSessions()
-.AddAsyncDaemon(Weasel.Core.AutoCreate.All);
+.AddAsyncDaemon(Marten.Events.Daemon.Resiliency.DaemonMode.Solo);
 
 // Configure MassTransit with RabbitMQ
 builder.Services.AddMassTransit(x =>

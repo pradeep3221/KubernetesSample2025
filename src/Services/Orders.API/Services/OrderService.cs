@@ -30,7 +30,7 @@ public class OrderService : IOrderService
             CustomerId = request.CustomerId,
             CreatedAt = DateTime.UtcNow,
             Status = OrderStatus.Pending,
-            Items = request.Items.Select(i => new OrderItem
+            Items = request.Items.Select(i => new Models.OrderItem
             {
                 ProductId = i.ProductId,
                 ProductName = i.ProductName,

@@ -138,7 +138,7 @@ public class InventoryService : IInventoryService
 
                 _logger.LogInformation(
                     "Released {Quantity} units of product {ProductId} for order {OrderId}",
-                    reservation.quantity, reservation.product_id, orderId);
+                    (int)reservation.quantity, (Guid)reservation.product_id, orderId);
 
                 // Publish event
                 await _publishEndpoint.Publish(new InventoryReleased

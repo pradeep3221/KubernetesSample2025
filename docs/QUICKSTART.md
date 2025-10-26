@@ -818,6 +818,10 @@ You now have a complete, production-ready microservices architecture running loc
 
 
 
+## Get token
+curl -X POST http://localhost:8080/realms/microservices/protocol/openid-connect/token \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "grant_type=password&client_id=orders-api&username=admin&password=Admin@123"
 
 # Via API Gateway (Recommended)
 curl http://localhost:5000/api/orders/health

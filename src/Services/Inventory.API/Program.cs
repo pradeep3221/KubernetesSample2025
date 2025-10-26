@@ -122,7 +122,6 @@ app.MapGet("/api/inventory/products", async (IProductRepository repo) =>
     var products = await repo.GetAllAsync();
     return Results.Ok(products);
 })
-.RequireAuthorization("InventoryRead")
 .WithName("GetAllProducts")
 .WithOpenApi();
 

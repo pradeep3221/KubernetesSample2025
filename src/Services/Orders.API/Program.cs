@@ -124,7 +124,6 @@ app.MapGet("/api/orders", async (OrdersDbContext db) =>
     var orders = await db.Orders.Include(o => o.Items).ToListAsync();
     return Results.Ok(orders);
 })
-.RequireAuthorization("OrdersRead")
 .WithName("GetAllOrders")
 .WithOpenApi();
 

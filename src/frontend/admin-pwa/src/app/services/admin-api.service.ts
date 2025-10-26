@@ -7,7 +7,7 @@ import { KeycloakService } from 'keycloak-angular';
   providedIn: 'root'
 })
 export class AdminApiService {
-  private apiUrl = 'http://localhost:5000/api'; // API Gateway URL
+  private apiUrl = 'http://localhost:5000'; // API Gateway URL
 
   constructor(
     private http: HttpClient,

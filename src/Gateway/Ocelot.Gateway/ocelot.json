@@ -28,7 +28,7 @@
           "Port": 8080
         }
       ],
-      "UpstreamPathTemplate": "/api/inventory/{everything}",
+      "UpstreamPathTemplate": "/inventory/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "RateLimitOptions": {
         "ClientWhitelist": [],
@@ -47,7 +47,7 @@
           "Port": 8080
         }
       ],
-      "UpstreamPathTemplate": "/api/notifications/{everything}",
+      "UpstreamPathTemplate": "/notifications/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "Keycloak",
@@ -70,7 +70,7 @@
           "Port": 8080
         }
       ],
-      "UpstreamPathTemplate": "/api/audit/{everything}",
+      "UpstreamPathTemplate": "/audit/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post" ],
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "Keycloak",

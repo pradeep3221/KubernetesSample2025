@@ -28,7 +28,7 @@ public class ProductRepository : IProductRepository
     public async Task<IEnumerable<Product>> GetAllAsync()
     {
         using var connection = GetConnection();
-        return await connection.QueryAsync<Product>("SELECT * FROM products ORDER BY name");
+        return await connection.QueryAsync<Product>("SELECT * FROM products ORDER BY \"Name\"");
     }
 
     public async Task<Product?> GetByIdAsync(Guid id)

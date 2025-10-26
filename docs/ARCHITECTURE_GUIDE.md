@@ -1,8 +1,35 @@
-# Architecture Documentation
+# Architecture Guide
 
-## System Architecture Overview
+> **Complete System Architecture for .NET 9 Microservices Platform**
 
-This document describes the architecture of the .NET Microservices platform with full observability.
+---
+
+## Table of Contents
+
+1. [System Overview](#system-overview)
+2. [High-Level Architecture](#high-level-architecture)
+3. [Component Details](#component-details)
+4. [Data Flow](#data-flow)
+5. [Database Schema](#database-schema)
+6. [Event Contracts](#event-contracts)
+7. [Security Architecture](#security-architecture)
+8. [Scalability](#scalability)
+9. [Resilience Patterns](#resilience-patterns)
+
+---
+
+## System Overview
+
+This is a **production-ready .NET 9 microservices architecture** demonstrating modern cloud-native patterns:
+
+✅ **4 Microservices** (Orders, Inventory, Notifications, Audit)  
+✅ **Event-Driven Architecture** (RabbitMQ + MassTransit)  
+✅ **Full Observability** (OpenTelemetry, Prometheus, Grafana, Loki, Tempo)  
+✅ **Polyglot Persistence** (SQL Server, PostgreSQL, Redis, Marten)  
+✅ **API Gateway** (Ocelot with Keycloak authentication)  
+✅ **Kubernetes Ready** (Helm charts included)  
+
+---
 
 ## High-Level Architecture
 
@@ -42,6 +69,8 @@ This document describes the architecture of the .NET Microservices platform with
                                         └─────────┘
 ```
 
+---
+
 ## Component Details
 
 ### Microservices
@@ -62,7 +91,7 @@ This document describes the architecture of the .NET Microservices platform with
   - Manage product inventory
   - Track stock levels
   - Reserve/release inventory
-  - Publish inventory events (Adjusted, Reserved, Released)
+  - Publish inventory events
   - Alert on low stock
 
 #### 3. Notifications API
@@ -116,38 +145,23 @@ This document describes the architecture of the .NET Microservices platform with
 
 #### Prometheus
 - **Purpose**: Metrics storage and querying
-- **Collects**:
-  - HTTP request metrics (rate, duration, errors)
-  - Runtime metrics (CPU, memory, GC)
-  - Database metrics (query performance)
-  - Custom business metrics
+- **Collects**: HTTP, runtime, database, business metrics
 - **Retention**: Configurable (default 15 days)
 
 #### Loki
 - **Purpose**: Log aggregation
-- **Features**:
-  - Structured logging
-  - Label-based indexing
-  - Log correlation with traces
-  - Efficient storage
+- **Features**: Structured logging, label-based indexing, trace correlation
 - **Retention**: Configurable (default 7 days)
 
 #### Tempo
 - **Purpose**: Distributed tracing
-- **Features**:
-  - Trace storage and querying
-  - Service dependency graphs
-  - Trace-to-metrics correlation
-  - Trace-to-logs correlation
+- **Features**: Trace storage, service dependency graphs, trace-to-metrics correlation
 
 #### Grafana
 - **Purpose**: Unified observability platform
-- **Features**:
-  - Dashboards for metrics
-  - Log exploration
-  - Trace visualization
-  - Correlation between signals
-  - Alerting
+- **Features**: Dashboards, log exploration, trace visualization, alerting
+
+---
 
 ## Data Flow
 
@@ -183,6 +197,8 @@ OpenTelemetry Collector
          ↓
     Grafana (visualization)
 ```
+
+---
 
 ## Database Schema
 
@@ -255,6 +271,8 @@ Keys:
 - user:{userId}:notifications → List of notification IDs
 ```
 
+---
+
 ## Event Contracts
 
 ### Order Events
@@ -273,7 +291,9 @@ Keys:
 - `NotificationRequested` - Request to send a notification
 - `NotificationSent` - Confirmation that notification was sent
 
-## Security
+---
+
+## Security Architecture
 
 ### Authentication Flow
 
@@ -299,7 +319,9 @@ Keys:
   - Require specific scopes for endpoints
   - Role-based access control
 
-## Scalability Considerations
+---
+
+## Scalability
 
 ### Horizontal Scaling
 - All microservices are stateless
@@ -322,6 +344,8 @@ Keys:
 - Loki distributed mode for high log volume
 - Tempo distributed mode for high trace volume
 
+---
+
 ## Resilience Patterns
 
 ### Implemented
@@ -336,6 +360,8 @@ Keys:
 - Timeout policies
 - Rate limiting
 - Saga pattern for distributed transactions
+
+---
 
 ## Monitoring and Alerting
 
@@ -368,55 +394,7 @@ Keys:
 - Message queue backlog
 - Service unavailability
 
-## Deployment
+---
 
-### Local Development
-- Docker Compose for all services
-- Hot reload for code changes
-- Local databases and message queues
-
-### Kubernetes (Production)
-- Helm charts for each service
-- ConfigMaps for configuration
-- Secrets for sensitive data
-- Horizontal Pod Autoscaling
-- Ingress for external access
-- Service mesh (optional: Istio, Linkerd)
-
-## Future Enhancements
-
-1. **API Gateway Enhancements**
-   - Rate limiting per client
-   - Request caching
-   - API versioning
-
-2. **Additional Services**
-   - Payment service
-   - Shipping service
-   - Customer service
-
-3. **Advanced Observability**
-   - Custom Grafana dashboards
-   - Automated alerting
-   - SLO/SLI tracking
-   - Error tracking (Sentry)
-
-4. **Performance**
-   - Redis caching layer
-   - CQRS with read models
-   - Event sourcing for all aggregates
-
-5. **Security**
-   - mTLS between services
-   - API key management
-   - Secrets rotation
-   - Vulnerability scanning
-
-## References
-
-- [OpenTelemetry Documentation](https://opentelemetry.io/docs/)
-- [Prometheus Best Practices](https://prometheus.io/docs/practices/)
-- [Grafana Documentation](https://grafana.com/docs/)
-- [MassTransit Documentation](https://masstransit.io/)
-- [Marten Documentation](https://martendb.io/)
+**Architecture is production-ready and cloud-native!** 🎉
 
